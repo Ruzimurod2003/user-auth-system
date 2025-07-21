@@ -1,0 +1,3 @@
+dotnet new webapi -o UserAuthSystem
+
+dotnet add package Swashbuckle.AspNetCore.SwaggerUi
