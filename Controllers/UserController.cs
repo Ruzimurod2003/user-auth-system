@@ -7,7 +7,7 @@ namespace UserAuthSystem.Controllers;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    [HttpGet]
+    [HttpGet("users")]
     public IActionResult GetUsers()
     {
         var users = new List<User>
@@ -36,5 +36,16 @@ public class UserController : ControllerBase
             }
         };
         return Ok(users);
+    }
+
+    [HttpGet("roles")]
+    public IActionResult GetRoles()
+    {
+        var roles = new List<Role>
+        {
+            new Role { Id = 1, Name = "Admin" },
+            new Role { Id = 2, Name = "User" }
+        };
+        return Ok(roles);
     }
 }
