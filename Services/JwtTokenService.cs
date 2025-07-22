@@ -1,14 +1,13 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
+using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
-using UserAuthSystem.Models;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace UserAuthSystem.Services;
 
 public interface IJwtTokenService
 {
-    string GenerateToken(string userName, string email, string role);
+    string GenerateToken(int userId, string email, string role);
 }
 
 public class JwtTokenService : IJwtTokenService
@@ -20,24 +19,26 @@ public class JwtTokenService : IJwtTokenService
         _config = config;
     }
 
-    public string GenerateToken(string userName, string email, string role)
-    {
-        var claims = new[]
+    public string GenerateToken(int userId, string email, string role)
+    {        
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, userName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
             new Claim(ClaimTypes.Email, email),
             new Claim(ClaimTypes.Role, role)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var authSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_config["JWT:Key"]));
 
         var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
+                issuer: _config["JWT:Issuer"],
+            expires: DateTime.Now.AddHours(int.Parse(_config["JWT:Expire"])),
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
-            signingCredentials: creds
+            signingCredentials: new SigningCredentials(
+                key: authSigningKey,
+                algorithm: SecurityAlgorithms.HmacSha256)
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);

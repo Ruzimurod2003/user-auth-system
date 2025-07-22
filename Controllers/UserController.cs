@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserAuthSystem.Models;
 
@@ -8,6 +9,7 @@ namespace UserAuthSystem.Controllers;
 public class UserController : ControllerBase
 {
     [HttpGet("users")]
+    [Authorize]
     public IActionResult GetUsers()
     {
         var users = new List<User>
