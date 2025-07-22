@@ -12,7 +12,7 @@ Run application in Visual Studio, `https` mode
 
 ### 3. SignalR client notification
 
-**URL:** Located in https://localhost:7207/signalr_client.html
+**URL:** Located in {application_url}/signalr_client.html
 
 ---
 
