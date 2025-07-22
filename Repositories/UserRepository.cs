@@ -11,6 +11,7 @@ public interface IUserRepository
     List<User> GetAllUsers();
     bool UserExists(string email);
     void AddUser(RegisterRequestDTO user);
+    void DeleteUser(User user);
 }
 public class UserRepository : IUserRepository
 {
@@ -20,7 +21,7 @@ public class UserRepository : IUserRepository
     {
         _jwtTokenService = jwtTokenService;
         _users = new List<User>()
-        {        
+        {
             new User {
                 Id = 1,
                 Email = "ruzimurodabdunazarov2003@mail.ru",
@@ -85,5 +86,9 @@ public class UserRepository : IUserRepository
             UpdatedAt = DateTime.UtcNow
         };
         _users.Add(newUser);
+    }
+    public void DeleteUser(User user)
+    {
+        _users.Remove(user);
     }
 }

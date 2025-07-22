@@ -39,7 +39,7 @@ public class AuthController : ControllerBase
         if (user == null || !_jwtTokenService.VerifyPassword(model.Password, user.Password))
             return Unauthorized("Invalid email or password");
 
-        var token = _jwtTokenService.GenerateToken(user.Id, user.Email, "User");
+        var token = _jwtTokenService.GenerateToken(user.Id, user.Email, user.Role);
         var refreshToken = _jwtTokenService.GenerateRefreshToken();
 
         user.RefreshToken = refreshToken;
@@ -56,7 +56,7 @@ public class AuthController : ControllerBase
         if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
             return Unauthorized("Invalid or expired refresh token");
 
-        var newAccessToken = _jwtTokenService.GenerateToken(user.Id, user.Email, "User");
+        var newAccessToken = _jwtTokenService.GenerateToken(user.Id, user.Email, user.Role);
         var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
 
         user.RefreshToken = newRefreshToken;
