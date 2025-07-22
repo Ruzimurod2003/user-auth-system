@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using UserAuthSystem.Repositories;
+using UserAuthSystem.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +71,8 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 app.UseSwagger(c =>
@@ -91,5 +94,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();
