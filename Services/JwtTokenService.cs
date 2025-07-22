@@ -2,12 +2,16 @@ using System.Text;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 
 namespace UserAuthSystem.Services;
 
 public interface IJwtTokenService
 {
     string GenerateToken(int userId, string email, string role);
+    string GenerateRefreshToken();
+    string HashPassword(string password);
+    bool VerifyPassword(string password, string hashedPassword);
 }
 
 public class JwtTokenService : IJwtTokenService
@@ -20,7 +24,7 @@ public class JwtTokenService : IJwtTokenService
     }
 
     public string GenerateToken(int userId, string email, string role)
-    {        
+    {
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -42,5 +46,24 @@ public class JwtTokenService : IJwtTokenService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
+    }
+
+    public string HashPassword(string password)
+    {
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_config["PasswordSalt"]));
+        var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+        return Convert.ToBase64String(hash);
+    }
+    public bool VerifyPassword(string password, string hashedPassword)
+    {
+        var hash = HashPassword(password);
+        return hash == hashedPassword;
     }
 }

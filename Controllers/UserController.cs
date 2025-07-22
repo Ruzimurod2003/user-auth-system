@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserAuthSystem.Models;
+using UserAuthSystem.Repositories;
 
 namespace UserAuthSystem.Controllers;
 
@@ -8,36 +9,17 @@ namespace UserAuthSystem.Controllers;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
+    private readonly IUserRepository _userRepository;
+    public UserController(IUserRepository userRepository)
+    {
+        _userRepository = userRepository;
+    }
+
     [HttpGet("users")]
     [Authorize]
     public IActionResult GetUsers()
     {
-        var users = new List<User>
-        {
-            new User {
-                Id = 1,
-                Email = "ruzimurodabdunazarov2003@mail.ru",
-                FullName = "Ruzimurod Abdunazarov",
-                RoleId = 1,
-                PasswordHash = "hashed_password_sample",
-                RefreshToken = "refresh_token_sample",
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            },
-            new User {
-                Id = 2,
-                Email = "ruzimurodabdunazarov@gmail.com",
-                FullName = "Ruzimurod Abdunazarov",
-                RoleId = 2,
-                PasswordHash = "hashed_password_sample_2",
-                RefreshToken = "refresh_token_sample_2",
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            }
-        };
-        return Ok(users);
+        return Ok(_userRepository.GetAllUsers());
     }
 
     [HttpGet("roles")]

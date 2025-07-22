@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using UserAuthSystem.DTOs;
 using UserAuthSystem.Models;
+using UserAuthSystem.Repositories;
 using UserAuthSystem.Services;
 
 namespace UserAuthSystem.Controllers;
@@ -9,16 +11,60 @@ namespace UserAuthSystem.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IUserRepository _userRepository;
 
-    public AuthController(IJwtTokenService jwtTokenService)
+    public AuthController(IJwtTokenService jwtTokenService, IUserRepository userRepository)
     {
         _jwtTokenService = jwtTokenService;
+        _userRepository = userRepository;
+    }
+
+    [HttpPost("register")]
+    public IActionResult Register(User user)
+    {
+        if (_userRepository.UserExists(user.Email))
+            return BadRequest("User already exists");
+
+        user.Password = _jwtTokenService.HashPassword(user.Password);
+        _userRepository.AddUser(user);
+
+        return Ok("User registered successfully");
+    }
+
+    [HttpPost("login")]
+    public IActionResult Login([FromBody] LoginRequestDTO model)
+    {
+        var user = _userRepository.GetAllUsers().SingleOrDefault(u => u.Email == model.Email);
+        if (user == null || !_jwtTokenService.VerifyPassword(model.Password, user.Password))
+            return Unauthorized("Invalid email or password");
+
+        var token = _jwtTokenService.GenerateToken(user.Id, user.Email, "User");
+        var refreshToken = _jwtTokenService.GenerateRefreshToken();
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+        return Ok(new { Token = token, RefreshToken = refreshToken });
     }
     
-    [HttpPost("login")]
-    public IActionResult Login(User user)
+    [HttpPost("refresh-token")]
+    public IActionResult RefreshToken([FromBody] TokenRequestDTO model)
     {
-        var token = _jwtTokenService.GenerateToken(user.Id, user.Email, "User");
-        return Ok(new { Token = token });
+        var user = _userRepository.GetUserByRefreshToken(model.RefreshToken);
+
+        if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
+            return Unauthorized("Invalid or expired refresh token");
+
+        var newAccessToken = _jwtTokenService.GenerateToken(user.Id, user.Email, "User");
+        var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
+
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+        return Ok(new
+        {
+            Token = newAccessToken,
+            RefreshToken = newRefreshToken
+        });
     }
 }
