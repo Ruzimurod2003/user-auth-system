@@ -9,3 +9,5 @@ dotnet add package Swashbuckle.AspNetCore
 dotnet add package Dapper
 
 dotnet add package Npgsql
+
+dotnet run
