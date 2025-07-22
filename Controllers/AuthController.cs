@@ -25,7 +25,6 @@ public class AuthController : ControllerBase
         if (_userRepository.UserExists(userDTO.Email))
             return BadRequest("User already exists");
 
-        userDTO.Password = PasswordExtension.HashPassword(userDTO.Password);
         _userRepository.AddUser(userDTO);
 
         return Ok("User registered successfully");
