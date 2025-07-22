@@ -1,18 +1,3 @@
-# User Authentication System
-
-This project provides functionality for user registration, login, token refresh, and user management (admin-only) using `ASP.NET Core`, `PostgreSQL`, and `Dapper`. The frontend consists of an `index.html` page served via `Live Server`.
-
-## Technologies
-
-* **Backend:** ASP.NET Core Web API
-* **Frontend:** HTML (`index.html`)
-* **ORM:** Dapper
-* **Database:** PostgreSQL
-* **Tokens:** JWT and Refresh Token
-* **SignalR:** Real-time notifications (when a user is deleted)
-
----
-
 ## Getting Started
 
 ### 1. Configure database connection string
