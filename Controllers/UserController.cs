@@ -30,7 +30,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Admin")]
     public IActionResult DeleteUser(int id)
     {
-        var user = _userRepository.GetAllUsers().SingleOrDefault(u => u.Id == id);
+        var user = _userRepository.GetUserById(id);
         if (user == null)
             return NotFound("User not found");
 

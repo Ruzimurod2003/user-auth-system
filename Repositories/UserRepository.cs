@@ -11,6 +11,8 @@ public interface IUserRepository
     User GetUserByRefreshToken(string refreshToken);
     void UpdateUser(User user);
     List<User> GetAllUsers();
+    User GetUserByEmail(string email);
+    User GetUserById(int id);
     bool UserExists(string email);
     void AddUser(RegisterRequestDTO user);
     void DeleteUser(User user);
@@ -93,5 +95,17 @@ public class UserRepository : IUserRepository
         using var connection = CreateConnection();
         string sql = "DELETE FROM users WHERE id = @Id";
         connection.Execute(sql, new { user.Id });
+    }
+    public User GetUserByEmail(string email)
+    {
+        using var connection = CreateConnection();
+        string sql = "SELECT * FROM users WHERE LOWER(email) = LOWER(@Email) LIMIT 1";
+        return connection.QueryFirstOrDefault<User>(sql, new { Email = email });
+    }
+    public User GetUserById(int id)
+    {
+        using var connection = CreateConnection();
+        string sql = "SELECT * FROM users WHERE id = @Id LIMIT 1";
+        return connection.QueryFirstOrDefault<User>(sql, new { Id = id });
     }
 }

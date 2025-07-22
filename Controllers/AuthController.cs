@@ -34,7 +34,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginRequestDTO model)
     {
-        var user = _userRepository.GetAllUsers().SingleOrDefault(u => u.Email == model.Email);
+        var user = _userRepository.GetUserByEmail(model.Email);
         if (user == null || !PasswordExtension.VerifyPassword(model.Password, user.Password))
             return Unauthorized("Invalid email or password");
 
