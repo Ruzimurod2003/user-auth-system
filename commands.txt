@@ -1,3 +1,5 @@
 dotnet new webapi -o UserAuthSystem
 
 dotnet add package Swashbuckle.AspNetCore.SwaggerUi
+
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
