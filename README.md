@@ -15,45 +15,19 @@ This project provides functionality for user registration, login, token refresh,
 
 ## Getting Started
 
-### 1. Launch the Frontend
+### 1. Launch the Application
 
-Run the `index.html` file using the `Live Server` extension in VS Code:
+Run application in Visual Studio, `https` mode
 
-```bash
-http://localhost:5500/index.html
-```
-
-### 2. Launch the Backend
+### 2. Configure database connection string
 
 The `appsettings.json` file contains the following configuration:
 
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "AllowedHosts": "*",
-  "Jwt": {
-    "Key": "3249f3f0-8b1e-4ebb-a8ee-1e40b0e90034",
-    "Issuer": "user auth system",
-    "Expire": "7"
-  },
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=postgres"
-  }
-}
-```
-
 **Note:** You can modify the `ConnectionStrings` value to match your own database.
 
-**To start the backend:**
+### 3. SignalR client notification
 
-```bash
-dotnet run
-```
+**URL:** Located in https://localhost:7207/signalr_client.html
 
 ---
 
@@ -67,9 +41,9 @@ dotnet run
 
 ```json
 {
-  "email": "user@example.com",
-  "password": "string",
-  "fullName": "User Full Name"
+  "email": "ruzimurod@gmail.com",
+  "password": "web123$",
+  "fullName": "Ruzimurod abdunazarov"
 }
 ```
 
@@ -83,17 +57,8 @@ dotnet run
 
 ```json
 {
-  "email": "user@example.com",
-  "password": "string"
-}
-```
-
-**Response:**
-
-```json
-{
-  "token": "jwt_token",
-  "refreshToken": "refresh_token"
+  "email": "admin@gmail.com",
+  "password": "Admin@123!"
 }
 ```
 
@@ -140,21 +105,5 @@ dotnet run
 
 ---
 
-## CORS Issue
-
-If you open `http://localhost:5500/index.html` via `Live Server`, you must add this origin to CORS in your backend’s `Program.cs` file:
-
-```csharp
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins("http://localhost:5500")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-});
-```
 
 With this setup, the application should work correctly.
