@@ -64,9 +64,9 @@ public class DatabaseInitializer
         await connection.ExecuteAsync(createFunctionSql);
         await connection.ExecuteAsync(createTriggerSql);
 
-        
+
         var checkAdminSql = "SELECT COUNT(1) FROM users WHERE email = @Email";
-        var adminEmail = "admin@example.com";
+        var adminEmail = "admin@gmail.com";
 
         var adminExists = await connection.ExecuteScalarAsync<bool>(checkAdminSql, new { Email = adminEmail });
 
@@ -88,6 +88,37 @@ public class DatabaseInitializer
                 FullName = "Admin User",
                 Role = "Admin",
                 Password = PasswordExtension.HashPassword("Admin@123!"),
+                RefreshToken = TokenExtension.GenerateRefreshToken(),
+                RefreshTokenExpiry = now.AddDays(_configuration.GetValue<int>("Jwt:Expire")),
+                CreatedAt = now,
+                UpdatedAt = now
+            };
+
+            await connection.ExecuteAsync(seedSql, seedUser);
+        }
+
+        var checkUserSql = "SELECT COUNT(1) FROM users WHERE email = @Email";
+        var userEmail = "user@gmail.com";
+        var userExists = await connection.ExecuteScalarAsync<bool>(checkUserSql, new { Email = userEmail });
+
+        if (!userExists)
+        {
+            var seedSql = @"
+                INSERT INTO users (
+                    email, full_name, role, password, refresh_token, refresh_token_expiry, created_at, updated_at
+                )
+                VALUES (
+                    @Email, @FullName, @Role, @Password, @RefreshToken, @RefreshTokenExpiry, @CreatedAt, @UpdatedAt
+                );
+            ";
+
+            var now = DateTime.UtcNow;
+            var seedUser = new
+            {
+                Email = userEmail,
+                FullName = "Regular User",
+                Role = "User",
+                Password = PasswordExtension.HashPassword("User@123!"),
                 RefreshToken = TokenExtension.GenerateRefreshToken(),
                 RefreshTokenExpiry = now.AddDays(_configuration.GetValue<int>("Jwt:Expire")),
                 CreatedAt = now,
