@@ -13,14 +13,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
     <script>
+        const hubUrl = `${window.location.origin}/hubs/notifications`;
+
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://localhost:7207/hubs/notifications")
+            .withUrl(hubUrl)
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
         connection.start().then(() => {
             document.getElementById("status").textContent = "Connected to SignalR";
-            console.log("SignalR connected");
+            console.log("SignalR connected to", hubUrl);
         }).catch(err => {
             document.getElementById("status").textContent = "Connection failed";
             console.error("SignalR connection error:", err.toString());
