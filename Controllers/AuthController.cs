@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using UserAuthSystem.DTOs;
-using UserAuthSystem.Models;
+using UserAuthSystem.Extensions;
 using UserAuthSystem.Repositories;
 using UserAuthSystem.Services;
 
@@ -26,7 +25,7 @@ public class AuthController : ControllerBase
         if (_userRepository.UserExists(userDTO.Email))
             return BadRequest("User already exists");
 
-        userDTO.Password = _jwtTokenService.HashPassword(userDTO.Password);
+        userDTO.Password = PasswordExtension.HashPassword(userDTO.Password);
         _userRepository.AddUser(userDTO);
 
         return Ok("User registered successfully");
@@ -36,11 +35,11 @@ public class AuthController : ControllerBase
     public IActionResult Login([FromBody] LoginRequestDTO model)
     {
         var user = _userRepository.GetAllUsers().SingleOrDefault(u => u.Email == model.Email);
-        if (user == null || !_jwtTokenService.VerifyPassword(model.Password, user.Password))
+        if (user == null || !PasswordExtension.VerifyPassword(model.Password, user.Password))
             return Unauthorized("Invalid email or password");
 
         var token = _jwtTokenService.GenerateToken(user.Id, user.Email, user.Role);
-        var refreshToken = _jwtTokenService.GenerateRefreshToken();
+        var refreshToken = TokenExtension.GenerateRefreshToken();
 
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
@@ -57,7 +56,7 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid or expired refresh token");
 
         var newAccessToken = _jwtTokenService.GenerateToken(user.Id, user.Email, user.Role);
-        var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
+        var newRefreshToken = TokenExtension.GenerateRefreshToken();
 
         user.RefreshToken = newRefreshToken;
         user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);

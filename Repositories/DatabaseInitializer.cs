@@ -1,18 +1,16 @@
 using Dapper;
 using Npgsql;
-using UserAuthSystem.Services;
+using UserAuthSystem.Extensions;
 
 namespace UserAuthSystem.Repositories;
 
 public class DatabaseInitializer
 {
     private readonly IConfiguration _configuration;
-    private readonly IJwtTokenService _jwtTokenService;
 
-    public DatabaseInitializer(IConfiguration configuration, IJwtTokenService jwtTokenService)
+    public DatabaseInitializer(IConfiguration configuration)
     {
         _configuration = configuration;
-        _jwtTokenService = jwtTokenService;
     }
 
     private NpgsqlConnection CreateConnection()
@@ -89,8 +87,8 @@ public class DatabaseInitializer
                 Email = adminEmail,
                 FullName = "Admin User",
                 Role = "Admin",
-                Password = _jwtTokenService.HashPassword("Admin@123!"),
-                RefreshToken = _jwtTokenService.GenerateRefreshToken(),
+                Password = PasswordExtension.HashPassword("Admin@123!"),
+                RefreshToken = TokenExtension.GenerateRefreshToken(),
                 RefreshTokenExpiry = now.AddDays(7),
                 CreatedAt = now,
                 UpdatedAt = now

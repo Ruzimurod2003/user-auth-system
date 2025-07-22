@@ -1,8 +1,8 @@
 using Dapper;
 using Npgsql;
 using UserAuthSystem.DTOs;
+using UserAuthSystem.Extensions;
 using UserAuthSystem.Models;
-using UserAuthSystem.Services;
 
 namespace UserAuthSystem.Repositories;
 
@@ -18,12 +18,10 @@ public interface IUserRepository
 
 public class UserRepository : IUserRepository
 {
-    private readonly IJwtTokenService _jwtTokenService;
     private readonly IConfiguration _configuration;
 
-    public UserRepository(IJwtTokenService jwtTokenService, IConfiguration configuration)
+    public UserRepository(IConfiguration configuration)
     {
-        _jwtTokenService = jwtTokenService;
         _configuration = configuration;
     }
 
@@ -80,8 +78,8 @@ public class UserRepository : IUserRepository
             Email = userDTO.Email,
             FullName = userDTO.FullName,
             Role = "User",
-            Password = _jwtTokenService.HashPassword(userDTO.Password),
-            RefreshToken = _jwtTokenService.GenerateRefreshToken(),
+            Password = PasswordExtension.HashPassword(userDTO.Password),
+            RefreshToken = TokenExtension.GenerateRefreshToken(),
             RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
