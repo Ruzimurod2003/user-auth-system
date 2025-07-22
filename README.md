@@ -15,15 +15,15 @@ This project provides functionality for user registration, login, token refresh,
 
 ## Getting Started
 
-### 1. Launch the Application
-
-Run application in Visual Studio, `https` mode
-
-### 2. Configure database connection string
+### 1. Configure database connection string
 
 The `appsettings.json` file contains the following configuration:
 
 **Note:** You can modify the `ConnectionStrings` value to match your own database.
+
+### 2. Launch the Application
+
+Run application in Visual Studio, `https` mode
 
 ### 3. SignalR client notification
 
