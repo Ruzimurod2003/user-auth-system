@@ -14,7 +14,7 @@
 
     <script>
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("http://localhost:5114/hubs/notifications")
+            .withUrl("https://localhost:7207/hubs/notifications")
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
