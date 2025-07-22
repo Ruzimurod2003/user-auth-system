@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using UserAuthSystem.Hubs;
-using UserAuthSystem.Repositories;
+using UserAuthSystem.Services;
 
 namespace UserAuthSystem.Controllers;
 
@@ -10,12 +10,12 @@ namespace UserAuthSystem.Controllers;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUserService _userService;
     private readonly IHubContext<NotificationHub> _notificationHub;
 
-    public UserController(IUserRepository userRepository, IHubContext<NotificationHub> notificationHub)
+    public UserController(IUserService userService, IHubContext<NotificationHub> notificationHub)
     {
-        _userRepository = userRepository;
+        _userService = userService;
         _notificationHub = notificationHub;
     }
 
@@ -23,20 +23,20 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Admin")]
     public IActionResult GetUsers()
     {
-        return Ok(_userRepository.GetAllUsers());
+        return Ok(_userService.GetAllUsers());
     }
 
     [HttpDelete("delete/{id}")]
     [Authorize(Roles = "Admin")]
     public IActionResult DeleteUser(int id)
     {
-        var user = _userRepository.GetUserById(id);
+        var user = _userService.GetUserById(id);
         if (user == null)
             return NotFound("User not found");
 
-        _userRepository.DeleteUser(user);
-        
-        _notificationHub.Clients.All.SendAsync("UserDeleted", user.Id);
+        _userService.DeleteUser(id);
+
+        _notificationHub.Clients.All.SendAsync("UserDeleted", id);
 
         return Ok("User deleted successfully");
     }

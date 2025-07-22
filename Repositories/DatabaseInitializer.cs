@@ -89,7 +89,7 @@ public class DatabaseInitializer
                 Role = "Admin",
                 Password = PasswordExtension.HashPassword("Admin@123!"),
                 RefreshToken = TokenExtension.GenerateRefreshToken(),
-                RefreshTokenExpiry = now.AddDays(7),
+                RefreshTokenExpiry = now.AddDays(_configuration.GetValue<int>("Jwt:Expire")),
                 CreatedAt = now,
                 UpdatedAt = now
             };

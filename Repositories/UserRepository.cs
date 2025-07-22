@@ -82,7 +82,7 @@ public class UserRepository : IUserRepository
             Role = "User",
             Password = PasswordExtension.HashPassword(userDTO.Password),
             RefreshToken = TokenExtension.GenerateRefreshToken(),
-            RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
+            RefreshTokenExpiry = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:Expire")),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

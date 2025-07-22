@@ -34,7 +34,7 @@ public class JwtTokenService : IJwtTokenService
 
         var token = new JwtSecurityToken(
                 issuer: _config["JWT:Issuer"],
-            expires: DateTime.Now.AddHours(int.Parse(_config["JWT:Expire"])),
+            expires: DateTime.UtcNow.AddMinutes(_config.GetValue<int>("Jwt:Expire")),
             claims: claims,
             signingCredentials: new SigningCredentials(
                 key: authSigningKey,
