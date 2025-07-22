@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using UserAuthSystem.DTOs;
 using UserAuthSystem.Models;
@@ -20,13 +21,13 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public IActionResult Register(User user)
+    public IActionResult Register([FromBody] RegisterRequestDTO userDTO)
     {
-        if (_userRepository.UserExists(user.Email))
+        if (_userRepository.UserExists(userDTO.Email))
             return BadRequest("User already exists");
 
-        user.Password = _jwtTokenService.HashPassword(user.Password);
-        _userRepository.AddUser(user);
+        userDTO.Password = _jwtTokenService.HashPassword(userDTO.Password);
+        _userRepository.AddUser(userDTO);
 
         return Ok("User registered successfully");
     }

@@ -1,3 +1,4 @@
+using UserAuthSystem.DTOs;
 using UserAuthSystem.Models;
 using UserAuthSystem.Services;
 
@@ -9,7 +10,7 @@ public interface IUserRepository
     void UpdateUser(User user);
     List<User> GetAllUsers();
     bool UserExists(string email);
-    void AddUser(User user);
+    void AddUser(RegisterRequestDTO user);
 }
 public class UserRepository : IUserRepository
 {
@@ -69,11 +70,20 @@ public class UserRepository : IUserRepository
         return _users.Any(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
     }
 
-    public void AddUser(User user)
+    public void AddUser(RegisterRequestDTO userDTO)
     {
-        user.Id = _users.Max(u => u.Id) + 1;
-        user.CreatedAt = DateTime.UtcNow;
-        user.UpdatedAt = DateTime.UtcNow;
-        _users.Add(user);
+        var newUser = new User
+        {
+            Id = _users.Max(u => u.Id) + 1,
+            Email = userDTO.Email,
+            FullName = userDTO.FullName,
+            RoleId = 1,
+            Password = _jwtTokenService.HashPassword(userDTO.Password),
+            RefreshToken = _jwtTokenService.GenerateRefreshToken(),
+            RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        _users.Add(newUser);
     }
 }
