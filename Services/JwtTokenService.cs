@@ -57,10 +57,14 @@ public class JwtTokenService : IJwtTokenService
 
     public string HashPassword(string password)
     {
-        using var sha256 = SHA256.Create();
-        var bytes = Encoding.UTF8.GetBytes(password);
-        var hash = sha256.ComputeHash(bytes);
-        return Convert.ToBase64String(hash);
+        using (SHA256 sha256Hash = SHA256.Create())
+        {
+            var hashedBytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+            var hashedPassword = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+
+            return hashedPassword;
+        }
     }
     public bool VerifyPassword(string password, string hashedPassword)
     {

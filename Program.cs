@@ -73,7 +73,15 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddSignalR();
 
+builder.Services.AddSingleton<DatabaseInitializer>();
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbInitializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
+    await dbInitializer.EnsureDatabaseCreatedAsync();
+}
 
 app.UseSwagger(c =>
 {
@@ -85,7 +93,6 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
     c.RoutePrefix = string.Empty;
 });
-
 
 app.UseHttpsRedirection();
 

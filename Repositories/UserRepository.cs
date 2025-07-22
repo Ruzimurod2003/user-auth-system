@@ -1,3 +1,5 @@
+using Dapper;
+using Npgsql;
 using UserAuthSystem.DTOs;
 using UserAuthSystem.Models;
 using UserAuthSystem.Services;
@@ -13,69 +15,68 @@ public interface IUserRepository
     void AddUser(RegisterRequestDTO user);
     void DeleteUser(User user);
 }
+
 public class UserRepository : IUserRepository
 {
     private readonly IJwtTokenService _jwtTokenService;
-    public List<User> _users { get; set; }
-    public UserRepository(IJwtTokenService jwtTokenService)
+    private readonly IConfiguration _configuration;
+
+    public UserRepository(IJwtTokenService jwtTokenService, IConfiguration configuration)
     {
         _jwtTokenService = jwtTokenService;
-        _users = new List<User>()
-        {
-            new User {
-                Id = 1,
-                Email = "ruzimurodabdunazarov2003@mail.ru",
-                FullName = "Ruzimurod Abdunazarov",
-                Role = "User",
-                Password = _jwtTokenService.HashPassword("paSsw0rd@123$"),
-                RefreshToken = "DrAZMHuFYt6Jr1bPjih3mtxFAz4MCKNYWr98hPp1oXU",
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            },
-            new User {
-                Id = 2,
-                Email = "ruzimurodabdunazarov@gmail.com",
-                FullName = "Ruzimurod Abdunazarov",
-                Role = "Admin",
-                Password = _jwtTokenService.HashPassword("paSsw0rd@123$"),
-                RefreshToken = "qsnGOSZZrAb5X5VzOeOtjxzCEW8CO9VmrPlByFUCfLI",
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            }
-        };
+        _configuration = configuration;
+    }
+
+    private NpgsqlConnection CreateConnection()
+    {
+        return new NpgsqlConnection(_configuration.GetConnectionString("DefaultConnection"));
     }
 
     public User GetUserByRefreshToken(string refreshToken)
     {
-        return _users.SingleOrDefault(u => u.RefreshToken == refreshToken);
+        using var connection = CreateConnection();
+        string sql = "SELECT * FROM users WHERE refresh_token = @RefreshToken LIMIT 1";
+        return connection.QueryFirstOrDefault<User>(sql, new { RefreshToken = refreshToken });
     }
 
     public void UpdateUser(User user)
     {
-        var index = _users.FindIndex(u => u.Id == user.Id);
-        if (index != -1)
-        {
-            _users[index] = user;
-        }
+        using var connection = CreateConnection();
+        string sql = @"
+            UPDATE users SET
+                email = @Email,
+                full_name = @FullName,
+                role = @Role,
+                password = @Password,
+                refresh_token = @RefreshToken,
+                refresh_token_expiry = @RefreshTokenExpiry,
+                updated_at = @UpdatedAt
+            WHERE id = @Id";
+        connection.Execute(sql, user);
     }
 
     public List<User> GetAllUsers()
     {
-        return _users;
+        using var connection = CreateConnection();
+        return connection.Query<User>("SELECT * FROM users").ToList();
     }
 
     public bool UserExists(string email)
     {
-        return _users.Any(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+        using var connection = CreateConnection();
+        string sql = "SELECT COUNT(1) FROM users WHERE LOWER(email) = LOWER(@Email)";
+        return connection.ExecuteScalar<bool>(sql, new { Email = email });
     }
 
     public void AddUser(RegisterRequestDTO userDTO)
     {
+        using var connection = CreateConnection();
+        string sql = @"
+            INSERT INTO users (email, full_name, role, password, refresh_token, refresh_token_expiry, created_at, updated_at)
+            VALUES (@Email, @FullName, @Role, @Password, @RefreshToken, @RefreshTokenExpiry, @CreatedAt, @UpdatedAt)";
+
         var newUser = new User
         {
-            Id = _users.Max(u => u.Id) + 1,
             Email = userDTO.Email,
             FullName = userDTO.FullName,
             Role = "User",
@@ -85,10 +86,14 @@ public class UserRepository : IUserRepository
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-        _users.Add(newUser);
+
+        connection.Execute(sql, newUser);
     }
+
     public void DeleteUser(User user)
     {
-        _users.Remove(user);
+        using var connection = CreateConnection();
+        string sql = "DELETE FROM users WHERE id = @Id";
+        connection.Execute(sql, new { user.Id });
     }
 }
